@@ -1,29 +1,128 @@
-openapi: "3.1.0"
+openapi: 3.0.3
 info:
   title: Meeting Scheduler API
-  description: API to find common meeting times for geographically distributed teams.
+  description: API for scheduling meetings, managing event slots, and retrieving availability recommendations.
   version: 1.0.0
 servers:
-  - url: https://api.meetingscheduler.com/v1
-    description: Production server
+  - url: http://localhost:8081
+
 paths:
   /events:
     post:
-      summary: Create a new event
+      summary: Create an event
       operationId: createEvent
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/EventRequest'
+              type: object
+              properties:
+                id:
+                  type: string
+                  format: uuid
+                title:
+                  type: string
+                duration:
+                  type: integer
+                slots:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      startTime:
+                        type: string
+                        format: date-time
+                      endTime:
+                        type: string
+                        format: date-time
+                      timezone:
+                        type: string
       responses:
         '201':
-          description: Event created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventResponse'
+          description: Event created
+
+  /events/{eventId}/slots:
+    post:
+      summary: Add event slots
+      operationId: addEventSlots
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  startTime:
+                    type: string
+                    format: date-time
+                  endTime:
+                    type: string
+                    format: date-time
+                  timezone:
+                    type: string
+      responses:
+        '200':
+          description: Slots added
+
+  /events/{eventId}/availability:
+    post:
+      summary: Submit user availability
+      operationId: submitAvailability
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: userName
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: userEmailId
+          in: query
+          required: true
+          schema:
+            type: string
+            format: email
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                properties:
+                  startTime:
+                    type: string
+                    format: date-time
+                  endTime:
+                    type: string
+                    format: date-time
+                  timezone:
+                    type: string
+      responses:
+        '200':
+          description: Availability submitted
+
   /events/{eventId}:
     get:
       summary: Get event details
@@ -34,54 +133,14 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         '200':
-          description: Event details retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventResponse'
-  /events/{eventId}/slots:
-    post:
-      summary: Add available time slots to an event
-      operationId: addEventSlots
-      parameters:
-        - name: eventId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/EventSlotsRequest'
-      responses:
-        '201':
-          description: Time slots added successfully
-  /events/{eventId}/availability:
-    post:
-      summary: Submit participant availability
-      operationId: submitAvailability
-      parameters:
-        - name: eventId
-          in: path
-          required: true
-          schema:
-            type: string
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AvailabilityRequest'
-      responses:
-        '201':
-          description: Availability submitted successfully
+          description: Event details returned
+
   /events/{eventId}/recommendations:
     get:
-      summary: Get recommended time slots for an event
+      summary: Get recommended meeting times
       operationId: getRecommendations
       parameters:
         - name: eventId
@@ -89,99 +148,15 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         '200':
-          description: Recommended time slots retrieved successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/RecommendationResponse'
-components:
-  schemas:
-    EventRequest:
-      type: object
-      properties:
-        title:
-          type: string
-        duration:
-          type: integer
-          description: Duration in minutes
-    EventResponse:
-      type: object
-      properties:
-        id:
-          type: string
-        title:
-          type: string
-        duration:
-          type: integer
-    EventSlotsRequest:
-      type: object
-      properties:
-        slots:
-          type: array
-          items:
-            type: object
-            properties:
-              start_time:
-                type: string
-                format: date-time
-              end_time:
-                type: string
-                format: date-time
-              timezone:
-                type: string
-    AvailabilityRequest:
-      type: object
-      properties:
-        user_id:
-          type: string
-        availability:
-          type: array
-          items:
-            type: object
-            properties:
-              start_time:
-                type: string
-                format: date-time
-              end_time:
-                type: string
-                format: date-time
-              timezone:
-                type: string
-    RecommendationResponse:
-      type: object
-      properties:
-        recommended_slots:
-          type: array
-          items:
-            type: object
-            properties:
-              start_time:
-                type: string
-                format: date-time
-              end_time:
-                type: string
-                format: date-time
-              timezone:
-                type: string
-        conflicts:
-          type: array
-          items:
-            type: object
-            properties:
-              user_id:
-                type: string
-              unavailable_slots:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    start_time:
-                      type: string
-                      format: date-time
-                    end_time:
-                      type: string
-                      format: date-time
-                    timezone:
-                      type: string
+          description: Recommended times returned
+
+  /health:
+    get:
+      summary: Health check endpoint
+      operationId: healthCheck
+      responses:
+        '200':
+          description: API is healthy
