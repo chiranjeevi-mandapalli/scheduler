@@ -1,0 +1,50 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- toYaml .Values.labels  | nindent 4 }} 
+spec:
+  selector:
+    matchLabels:
+      {{- toYaml .Values.labels | nindent 6 }}
+  serviceName: {{ .Release.Name }}
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: 1
+  {{- end }}
+  template:
+    metadata:
+      labels:
+       {{- toYaml .Values.labels | nindent 8 }}
+    spec:
+      # affinity:
+      #   nodeAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       nodeSelectorTerms:
+      #         - matchExpressions:
+      #             - key: kubernetes.io/hostname
+      #               operator: In
+      #               values:
+      #                 - {{ .Values.node }}
+
+      #hostNetwork: true
+      containers:
+      - name: {{ .Release.Name }}
+        image: {{ .Values.image.repository }}
+        args: ["-c", "max_connections=2000"]
+        ports:
+            - containerPort: {{ .Values.service.targetport }}
+        envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-config    
+        volumeMounts:
+        - name: postgres-data
+          mountPath: {{ .Values.container.mouthpath }}
+
+      volumes:
+        - name: postgres-data
+          hostPath:
+            path: /var/lib/postgresql
+            type: DirectoryOrCreate

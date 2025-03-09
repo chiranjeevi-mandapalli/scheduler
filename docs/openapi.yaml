@@ -1,0 +1,187 @@
+openapi: "3.1.0"
+info:
+  title: Meeting Scheduler API
+  description: API to find common meeting times for geographically distributed teams.
+  version: 1.0.0
+servers:
+  - url: https://api.meetingscheduler.com/v1
+    description: Production server
+paths:
+  /events:
+    post:
+      summary: Create a new event
+      operationId: createEvent
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventRequest'
+      responses:
+        '201':
+          description: Event created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+  /events/{eventId}:
+    get:
+      summary: Get event details
+      operationId: getEvent
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventResponse'
+  /events/{eventId}/slots:
+    post:
+      summary: Add available time slots to an event
+      operationId: addEventSlots
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EventSlotsRequest'
+      responses:
+        '201':
+          description: Time slots added successfully
+  /events/{eventId}/availability:
+    post:
+      summary: Submit participant availability
+      operationId: submitAvailability
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AvailabilityRequest'
+      responses:
+        '201':
+          description: Availability submitted successfully
+  /events/{eventId}/recommendations:
+    get:
+      summary: Get recommended time slots for an event
+      operationId: getRecommendations
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Recommended time slots retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RecommendationResponse'
+components:
+  schemas:
+    EventRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        duration:
+          type: integer
+          description: Duration in minutes
+    EventResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        duration:
+          type: integer
+    EventSlotsRequest:
+      type: object
+      properties:
+        slots:
+          type: array
+          items:
+            type: object
+            properties:
+              start_time:
+                type: string
+                format: date-time
+              end_time:
+                type: string
+                format: date-time
+              timezone:
+                type: string
+    AvailabilityRequest:
+      type: object
+      properties:
+        user_id:
+          type: string
+        availability:
+          type: array
+          items:
+            type: object
+            properties:
+              start_time:
+                type: string
+                format: date-time
+              end_time:
+                type: string
+                format: date-time
+              timezone:
+                type: string
+    RecommendationResponse:
+      type: object
+      properties:
+        recommended_slots:
+          type: array
+          items:
+            type: object
+            properties:
+              start_time:
+                type: string
+                format: date-time
+              end_time:
+                type: string
+                format: date-time
+              timezone:
+                type: string
+        conflicts:
+          type: array
+          items:
+            type: object
+            properties:
+              user_id:
+                type: string
+              unavailable_slots:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    start_time:
+                      type: string
+                      format: date-time
+                    end_time:
+                      type: string
+                      format: date-time
+                    timezone:
+                      type: string

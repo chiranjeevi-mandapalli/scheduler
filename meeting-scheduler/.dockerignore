@@ -1,0 +1,6 @@
+# Ignore these files from the Docker image
+.git
+node_modules
+*.md
+*.log
+# *.env

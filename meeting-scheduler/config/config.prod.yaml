@@ -1,0 +1,13 @@
+server:
+  port: "8081"
+
+database:
+  host: "my-rds-instance.cvysk22o2ivq.ap-south-1.rds.amazonaws.com"
+  port: "5432"
+  username: "${DB_USERNAME}"
+  password: "${DB_PASSWORD}"
+  name: "meeting_scheduler_db"
+  sslmode: "disable"
+
+
+#  sslmode: "require"

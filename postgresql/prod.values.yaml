@@ -1,0 +1,51 @@
+config:
+  POSTGRES_DB: meeting_scheduler_db
+  POSTGRES_USER: chiru
+  POSTGRES_PASSWORD: securepassword123
+  PGDATA: /data/postgresql/pgdata
+
+labels:
+  env: prod
+  app: postgres
+  product: vault
+
+replicaCount: 1
+
+storageClass: gp2
+
+container:
+  name: postgres
+  mouthpath: /data/postgresql
+
+image:
+  repository: postgres:12
+
+service:
+  type: NodePort
+  port: 5432
+  name: postgres
+  targetport: 5432
+  nodePort: 32560
+
+snapshot_pvc: 
+  enabled: false
+  name: vault-psql-sp
+  
+storage_size: 10Gi
+
+#hpa
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 80
+
+#postgres memory and cpu 
+requests:
+   memory: "200Mi"
+   cpu: "80m"
+
+limits:
+   memory: "400Mi"
+   cpu: "100m"  
+

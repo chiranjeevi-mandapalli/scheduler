@@ -1,0 +1,13 @@
+server:
+  port: "80"
+
+database:
+  host: "vault-pgsql"
+  port: "5432"
+  username: "chiru"
+  password: "securepassword123"
+  name: "meeting_scheduler_db"
+  sslmode: "disable"
+
+sqlFilePath: "config/scheduler.sql"
+
