@@ -27,6 +27,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: 9063770754
       DB_NAME: meeting_scheduler_db
+    
     ports:
       - "8081:8081"
 

@@ -15,17 +15,6 @@ data "aws_subnets" "selected" {
   }
 }
 
-module "rds" {
-  source              = "./modules/rds"
-  db_instance_name    = "stack-gen-postgres-rds"
-  db_username         = "chiru"
-  db_password         = "securepassword123"
-  db_instance_class   = "db.t3.micro"
-  db_allocated_storage = 20
-  db_engine           = "postgres"
-  db_engine_version   = "15"
-}
-
 module "eks" {
     source = "./modules/eks"
     cluster_name = "stack-gen-eks-cluster"
